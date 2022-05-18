@@ -1,23 +1,22 @@
 package com.ctg.test.controller;
 
+import com.ctg.test.config.RedisService;
 import com.ctg.test.config.RedisUtil;
 import com.ctg.test.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * //UUID.randomUUID().toString();
@@ -35,6 +34,10 @@ public class TestRedisController {
     private final Logger log = LoggerFactory.getLogger(TestRedisController.class);
     @Autowired
     RedisUtil redisUtil;
+
+    @Autowired
+    private RedisService redisService;
+
     @RequestMapping(value = "/setSession", method = RequestMethod.GET)
     @ResponseBody
     public Map<String, Object> firstResp(HttpSession session,HttpServletRequest request, @RequestParam("key") String key
@@ -73,9 +76,30 @@ public class TestRedisController {
     @RequestMapping(value = "/getRedis", method = RequestMethod.GET)
     @ResponseBody
     public Object getRedis(HttpServletRequest request) {
-        Map<String, Object> map = new HashMap<>();
-        //redisTemplate2.opsForValue().get("test")
-        map.put("getRedis", redisUtil.get("test"));
+        String key = "device_info_stash";
+//        redisService.setCacheMapValue(key,"82","{\"params\":{},\"notSearchTotal\":false,\"id\":82,\"civilCode\":\"511525\",\"longitude\":\"104.553832453496\",\"latitude\":\"28.710105536185\",\"address\":\"512电厂公交站（枪）\",\"sbcjqy\":\"B0501\"}");
+//        Collection<Object> hKeys = new ArrayList<>();
+//        hKeys.add("65854");
+//        hKeys.add("2777");
+//        hKeys.add("2556");
+//        List<Object> testList = redisService.getMultiCacheMapValue(key,hKeys);
+        //获得缓存的Map
+        Map<String, Object> cacheMap = redisService.getCacheMap(key);
+        //获取所有hash结构中所有的key(hkeys)
+        Set<String> hKeys = redisService.getHkeys(key);
+        Map<Object, Object> map = new HashMap<>();
+        for(String hKey : hKeys){
+            log.info("hKey=========={}",hKey);
+            try {
+                String stash = redisService.getCacheMapValue(key, hKey + "");
+                log.info("value======={}",stash);
+                map.put(hKey, stash);
+            }
+            catch (Exception ex)
+            {
+                log.error("hKey=========={}",hKey);
+            }
+        }
         return map;
     }
 }

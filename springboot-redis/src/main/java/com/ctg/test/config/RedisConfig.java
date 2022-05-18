@@ -79,20 +79,35 @@ public class RedisConfig {
         template.afterPropertiesSet();
         return template;
     }
-    /**
-     * redis作为缓存
-     * @param redisTemplate
-     * @return
-     */
-    @Bean
-    public CacheManager cacheManager(RedisTemplate<String, Object>  redisTemplate) {
-        RedisCacheManager rcm = new RedisCacheManager(redisTemplate);
-        // 多个缓存的名称,目前只定义了一个
-        rcm.setCacheNames(Arrays.asList("user"));
-        //设置缓存过期时间(秒)
-        rcm.setDefaultExpiration(60);
-        return rcm;
+
+    @Bean({"ivdgRedisTemplate"})
+    public RedisTemplate<Object, Object> redisTemplate4(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<Object, Object> template = new RedisTemplate();
+        template.setConnectionFactory(connectionFactory);
+        FastJson2JsonRedisSerializer serializer = new FastJson2JsonRedisSerializer(Object.class);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+        mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+        serializer.setObjectMapper(mapper);
+        template.setValueSerializer(serializer);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.afterPropertiesSet();
+        return template;
     }
+//    /**
+//     * redis作为缓存
+//     * @param redisTemplate
+//     * @return
+//     */
+//    @Bean
+//    public CacheManager cacheManager(RedisTemplate<String, Object>  redisTemplate) {
+//        RedisCacheManager rcm = new RedisCacheManager(redisTemplate);
+//        // 多个缓存的名称,目前只定义了一个
+//        rcm.setCacheNames(Arrays.asList("user"));
+//        //设置缓存过期时间(秒)
+//        rcm.setDefaultExpiration(60);
+//        return rcm;
+//    }
 
     /**
      * 在springboot中使用spring-session的时候，
