@@ -4,6 +4,7 @@
 	<springProperty scope="context" name="logLevel" source="log.level" />
 	<springProperty scope="context" name="logPath" source="logging.path" />
 	<property name="APP_NAME" value="${spring.application.name}" />
+	<property name="logPath" value="/logs/${spring.application.name}"/>
 	<contextName>${APP_NAME}</contextName>
 	<property name="LOG_PATTERN" value="[%-5level] [%d{yyyy-MM-dd HH:mm:ss.SSS}] [%logger{40}:%line][%thread] 服务名称:${APP_NAME}--> %msg%n "/>
 
